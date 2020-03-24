@@ -1,0 +1,383 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .errores {
+        -moz-box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        background: #FF1A0D;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        color: #fff;
+        display: none;
+        font-size: 12px;
+        margin-top: -50px;
+        margin-left: 247px;
+        padding: 10px;
+        position: absolute;
+    }
+</style>
+
+<div class="page-header text-center">
+    <h2>Listado de Vendedores</h2>
+</div>
+<div id="divMensajeHeader" class="text-center" hidden>
+    <label id="lblMensajeHeader"></label>
+</div>
+<table id="tVendedores" class="table table-striped table-hover">
+    <tr>
+        <th>Codigo</th>
+        <th>Nombres</th>
+        <th>Apellidos</th>
+        <th>Numero Identificación</th>
+        <th>Ciudad</th>
+        <th width="100px">Acciones</th>
+    </tr>
+</table>
+<br />
+<button class="btn btn-success" id="btnRegistrar" type="button" data-toggle="modal" data-target="#dialog-modal"><span class="glyphicon glyphicon-registration-mark"></span> Registrar Vendedor</button>
+<button class="btn btn-info" id="btnActualizar" type="button"><span class="glyphicon glyphicon-refresh"></span> Actualizar</button>
+
+<div id="dialog-modal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="modal-title">Registrar Vendedor</h4>
+                    </div>
+                    <div class="col-lg-6">
+                        <a href="#" class="close" data-dismiss="modal" id="cerrar">[x]</a>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div id="divMensaje" class="text-center" hidden>
+                    <label id="lblMensaje"></label>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="txtCodigo" class="col-sm-2 col-form-label">Codigo</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="txtCodigo" placeholder="Codigo" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="txtNombre" class="col-sm-2 col-form-label">Nombre</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="txtNombre" placeholder="Nombres">
+                                <span class="errores" id="errorNombre" style="width:300px">* Debe llenar el campo Nombre</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="txtApellido" class="col-sm-2 col-form-label">Apellido</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="txtApellido" placeholder="Apellidos">
+                                <span class="errores" id="errorApellido" style="width:300px">* Debe llenar el campo Apellido</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="txtNumeroId" class="col-sm-2 col-form-label">Identificación</label>
+                            <div class="col-sm-12">
+                                <input type="text" class="form-control" id="txtNumeroId" placeholder="Numero Identificación">
+                                <span class="errores" id="errorNumeroId" style="width:300px">* Debe llenar el campo Numero Identificación</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="txtCiudad" class="col-sm-2 col-form-label">Ciudad</label>
+                            <div class="col-sm-12">
+                                <select id="txtCiudad" class="form-control">
+                                    <option value="">- Seleccione una Opcion -</option>
+                                </select>
+                                <span id="errorCiudad" class="errores">* Debe Seleccionar una Opción</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="form-group text-center">
+                            <button class="btn btn-success" id="btnGuardar" type="button"><span class="glyphicon glyphicon-floppy-disk"></span> Guardar</button>
+                            <button class="btn btn-danger" id="btnCancelar" type="reset"><span class="glyphicon glyphicon-remove"></span> Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+        load();
+        var isEditar = false;
+
+        /**
+         * Trae todos los registros de la tabla Ciudad
+         * */
+        $.ajax({
+            url: 'api/Ciudad',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var clasificacion = $("#txtCiudad");
+                $(data).each(function (i, oCiudad) {
+                    clasificacion.append('<option value="' + oCiudad.codigo + '">' + oCiudad.descripcion + '</option>');
+                });
+
+            },
+            error: function () {
+                console.log('err')
+            }
+        });
+
+        /**
+         * Esta funcion obtiene todos los datos de la tabla Vendedor
+         * */
+        function load() {
+            var table = $('#tVendedores').DataTable({
+                "processing": true,
+                "ajax": {
+                    "url": "api/Vendedor",
+                    "type": "GET",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "title": "Codigo", "data": "Codigo" },
+                    { "title": "Nombres", "data": "Nombre" },
+                    { "title": "Apellidos", "data": "Apellido" },
+                    { "title": "Numero Identificación", "data": "Numero_Identificacion" },
+                    { "title": "Ciudad", "data": "Codigo_Ciudad.Descripcion" },
+                    { "defaultContent": "<button class='btn btn-info' id='btnEditar'><span class='glyphicon glyphicon-pencil'></span></button> <button class='btn btn-danger' id='btnEliminar'><span class='glyphicon glyphicon-trash'></span></button>", "width": "100px" }
+                ]
+            });
+
+            SeleccionFila("#tVendedores", table)
+        }
+
+        /**
+         * Cierra el pop-up, cambia el valor de la variable isEditar a false.
+         * Limpia campos del pop-uup.
+         * */
+        $('#btnCancelar').click(function () {
+            $("#dialog-modal").modal("hide");
+            isEditar = false;
+            limpiar();
+        });
+
+        /**
+         * Actualiza la grilla / tabla.
+         * */
+        $('#btnActualizar').click(function () {
+            $('#tVendedores').DataTable().ajax.reload();
+        });
+
+        /**
+         * Cada vez que se cierre el pop-up desde la [x], se cambia el valor isEditar
+         * y se limpian los campos del pop-up.
+         * */
+        $('#cerrar').click(function () {
+            isEditar = false;
+            limpiar();
+        });
+
+        /**
+         * Esta funcion valida, los campos campos que son requeridos
+         * para crear un nuevo vendedor.
+         * */
+        function Validar() {
+            var error = false;
+            if ($('#txtNombre').val().length == 0) {
+                $('#errorNombre').fadeIn("slow");
+                error = true;
+            } else {
+                $('#errorNombre').fadeOut("slow");
+            }
+            if ($('#txtApellido').val().length == 0) {
+                $('#errorApellido').fadeIn("slow");
+                error = true;
+            } else {
+                $('#errorApellido').fadeOut("slow");
+            }
+            if ($('#txtNumeroId').val().length == 0) {
+                $('#errorNumeroId').fadeIn("slow");
+                error = true;
+            } else {
+                $('#errorNumeroId').fadeOut("slow");
+            }
+            if ($('#txtCiudad').val().length == 0) {
+                $('#errorCiudad').fadeIn("slow");
+                error = true;
+            } else {
+                $('#errorCiudad').fadeOut("slow");
+            }
+
+            return error;
+        }
+
+        /**
+         * Esta funcion guarda un nuevo registro en base de datos.
+         * Edita información de un registro existente.
+         * Se diferencia de ambos a partir de la variable isEditar
+         * */
+        $('#btnGuardar').click(function () {
+
+            var existError = Validar();
+            if (!existError) {
+                if (!isEditar) {
+                    $.post("api/Vendedor", {
+                        nombre: $('#txtNombre').val(), apellido: $('#txtApellido').val()
+                        , numero_identificacion: $('#txtNumeroId').val(), codigo_ciudad: $('#txtCiudad').val()
+                        }, function (data) {
+                        console.log(data);
+                        var result = data.codigo;
+                        console.log(result);
+                        if (result != null) {
+                            console.log("GUARDO")
+                            var texto = "Se almaceno el nuevo Vendedor ";
+                            $('#lblMensaje').text(texto);
+                            $('#divMensaje').removeClass('alert alert-danger');
+                            $('#divMensaje').addClass('alert alert-success');
+                            $('#divMensaje').show();
+                            $('#txtNombre').text("");
+                            $('#txtApellido').text("");
+                            $('#txtNumeroId').text("");
+                            isEditar = false;
+                            setTimeout(function () {
+                                $('#divMensaje').fadeOut(1500);
+                            }, 3000);
+                            $('#tVendedores').DataTable().ajax.reload();
+                            limpiar();
+                        } else {
+                            console.log("ERROR")
+                            $('#lblMensaje').text('Error: ' + data.Mensaje);
+                            $('#divMensaje').removeClass('alert alert-success');
+                            $('#divMensaje').addClass('alert alert-danger');
+                            $('#divMensaje').show();
+                            isEditar = false;
+                            setTimeout(function () {
+                                $('#divMensaje').fadeOut(1500);
+                            }, 3000);
+                        }
+                    });
+                }
+                else {
+                    $.ajax({
+                        url: 'api/Vendedor?codigo=' + $('#txtCodigo').val(),
+                        type: 'PUT',
+                        dataType: 'json',
+                        data: {
+                            codigo: $('#txtCodigo').val(), nombre: $('#txtNombre').val(), apellido: $('#txtApellido').val()
+                            , numero_identificacion: $('#txtNumeroId').val(), codigo_ciudad: $('#txtCiudad').val() },
+                        success: function (data) {
+                            console.log(data);
+                            var result = data.codigo;
+                            if (result != null) {
+                                var texto = "Se ha modificado el registro";
+                                $('#lblMensaje').text(texto);
+                                $('#divMensaje').removeClass('alert alert-danger');
+                                $('#divMensaje').addClass('alert alert-success');
+                                $('#divMensaje').show();
+                                isEditar = false;
+                                setTimeout(function () {
+                                    $('#divMensaje').fadeOut(1500);
+                                }, 3000);
+                                $('#tVendedores').DataTable().ajax.reload();
+                                limpiar();
+                            } else {
+                                $('#lblMensaje').text('Error: ' + result.Mensaje);
+                                $('#divMensaje').removeClass('alert alert-success');
+                                $('#divMensaje').addClass('alert alert-danger');
+                                $('#divMensaje').show();
+                                isEditar = false;
+                                setTimeout(function () {
+                                    $('#divMensaje').fadeOut(1500);
+                                }, 3000);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        /**
+         * Cada vez que se selecciona la fila, se realizan alguna de las siguientes
+         * opciones, Eliminar o Editar.
+         * */
+        function SeleccionFila(tbody, table) {
+            $(tbody).on('click', '#btnEliminar', function () {
+                var oVendedor = table.row($(this).parents('tr')).data();
+                var id = oVendedor.Codigo;
+                console.log(id);
+                $.ajax({
+                    url: 'api/Vendedor?codigo=' + id,
+                    type: 'DELETE',
+                    dataType: 'json',
+                    data: { codigo: id },
+                    success: function (data) {
+                        console.log(data);
+                        var result = data.codigo;
+                        if (result != null) {
+                            var texto = "Se ha eliminado el registro";
+                            $('#lblMensajeHeader').text(texto);
+                            $('#divMensajeHeader').removeClass('alert alert-danger');
+                            $('#divMensajeHeader').addClass('alert alert-success');
+                            $('#divMensajeHeader').show();
+                            setTimeout(function () {
+                                $('#divMensajeHeader').fadeOut(1500);
+                            }, 3000);
+                            $('#tVendedores').DataTable().ajax.reload();
+                        } else {
+                            $('#lblMensajeHeader').text('Error: ' + result.Mensaje);
+                            $('#divMensajeHeader').removeClass('alert alert-success');
+                            $('#divMensajeHeader').addClass('alert alert-danger');
+                            $('#divMensajeHeader').show();
+                            setTimeout(function () {
+                                $('#divMensajeHeader').fadeOut(1500);
+                            }, 3000);
+                        }
+                    }
+                });
+            });
+
+            $(tbody).on('click', '#btnEditar', function () {
+                var oVendedor = table.row($(this).parents('tr')).data();
+                console.log(oVendedor);
+                $('#txtCodigo').val(oVendedor.Codigo);
+                $('#txtNombre').val(oVendedor.Nombre);
+                $('#txtApellido').val(oVendedor.Apellido);
+                $('#txtNumeroId').val(oVendedor.Numero_Identificacion);
+                $('#txtCiudad').val(oVendedor.Codigo_Ciudad.Codigo);
+                isEditar = true;
+                $("#dialog-modal").modal("show");
+            });
+        }
+
+        /**
+         * Limpiar todos los campos del pop-up.
+         * */
+        function limpiar() {
+            $('#txtCodigo').val('');
+            $('#txtNombre').val('');
+            $('#txtApellido').val('');
+            $('#txtNumeroId').val('');
+            $('#txtCiudad').val('');
+        }
+    });
+</script>

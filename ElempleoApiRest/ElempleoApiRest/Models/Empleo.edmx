@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="ELEMPLEOModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CIUDAD">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="descripcion" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="VENDEDOR">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="nombre" Type="varchar" MaxLength="50" />
+          <Property Name="apellido" Type="varchar" MaxLength="50" />
+          <Property Name="numero_identificacion" Type="decimal"  />
+          <Property Name="codigo_ciudad" Type="int" />
+        </EntityType>
+        <Association Name="FK_CIUDAD_VENDEDOR">
+          <End Role="CIUDAD" Type="Self.CIUDAD" Multiplicity="0..1" />
+          <End Role="VENDEDOR" Type="Self.VENDEDOR" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CIUDAD">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="VENDEDOR">
+              <PropertyRef Name="codigo_ciudad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ELEMPLEOModelStoreContainer">
+          <EntitySet Name="CIUDAD" EntityType="Self.CIUDAD" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="VENDEDOR" EntityType="Self.VENDEDOR" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_CIUDAD_VENDEDOR" Association="Self.FK_CIUDAD_VENDEDOR">
+            <End Role="CIUDAD" EntitySet="CIUDAD" />
+            <End Role="VENDEDOR" EntitySet="VENDEDOR" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="ELEMPLEOModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="CIUDAD">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="descripcion" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="VENDEDOR" Relationship="Self.FK_CIUDAD_VENDEDOR" FromRole="CIUDAD" ToRole="VENDEDOR" />
+        </EntityType>
+        <EntityType Name="VENDEDOR">
+          <Key>
+            <PropertyRef Name="codigo" />
+          </Key>
+          <Property Name="codigo" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="apellido" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="numero_identificacion" Type="Decimal" />
+          <Property Name="codigo_ciudad" Type="Int32" />
+          <NavigationProperty Name="CIUDAD" Relationship="Self.FK_CIUDAD_VENDEDOR" FromRole="VENDEDOR" ToRole="CIUDAD" />
+        </EntityType>
+        <Association Name="FK_CIUDAD_VENDEDOR">
+          <End Role="CIUDAD" Type="Self.CIUDAD" Multiplicity="0..1" />
+          <End Role="VENDEDOR" Type="Self.VENDEDOR" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CIUDAD">
+              <PropertyRef Name="codigo" />
+            </Principal>
+            <Dependent Role="VENDEDOR">
+              <PropertyRef Name="codigo_ciudad" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="ELEMPLEOEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CIUDAD" EntityType="Self.CIUDAD" />
+          <EntitySet Name="VENDEDOR" EntityType="Self.VENDEDOR" />
+          <AssociationSet Name="FK_CIUDAD_VENDEDOR" Association="Self.FK_CIUDAD_VENDEDOR">
+            <End Role="CIUDAD" EntitySet="CIUDAD" />
+            <End Role="VENDEDOR" EntitySet="VENDEDOR" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="ELEMPLEOModelStoreContainer" CdmEntityContainer="ELEMPLEOEntities">
+          <EntitySetMapping Name="CIUDAD">
+            <EntityTypeMapping TypeName="ELEMPLEOModel.CIUDAD">
+              <MappingFragment StoreEntitySet="CIUDAD">
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+                <ScalarProperty Name="descripcion" ColumnName="descripcion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="VENDEDOR">
+            <EntityTypeMapping TypeName="ELEMPLEOModel.VENDEDOR">
+              <MappingFragment StoreEntitySet="VENDEDOR">
+                <ScalarProperty Name="codigo" ColumnName="codigo" />
+                <ScalarProperty Name="nombre" ColumnName="nombre" />
+                <ScalarProperty Name="apellido" ColumnName="apellido" />
+                <ScalarProperty Name="numero_identificacion" ColumnName="numero_identificacion" />
+                <ScalarProperty Name="codigo_ciudad" ColumnName="codigo_ciudad" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
